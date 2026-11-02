@@ -130,6 +130,7 @@ fn test_build_commit() {
     println!("cargo:rerun-if-env-changed=HEX_BUILD_CHANNEL");
     println!("cargo:rerun-if-env-changed=HEX_TEST_BUILD");
     println!("cargo:rerun-if-env-changed=HEX_LOCAL_BUILD");
+    println!("cargo:rerun-if-env-changed=HEX_EDITION_NAME");
     if std::env::var("HEX_TEST_BUILD").as_deref() != Ok("1")
         && std::env::var("HEX_LOCAL_BUILD").as_deref() != Ok("1")
     {
@@ -167,7 +168,15 @@ fn test_build_commit() {
 fn embed_windows_resources() {
     let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let output_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
-    let icon = manifest_dir.join("resources/windows/hex.ico");
+    // An office edition (src/edition.rs) brings its own name and icon.
+    let edition = std::env::var("HEX_EDITION_NAME")
+        .ok()
+        .filter(|name| !name.trim().is_empty());
+    let icon = match &edition {
+        Some(_) => manifest_dir.join("edition/assets/app.ico"),
+        None => manifest_dir.join("resources/windows/hex.ico"),
+    };
+    let product = edition.as_deref().unwrap_or("Hex").replace('"', "");
     println!("cargo:rerun-if-changed={}", icon.display());
     let version = std::env::var("CARGO_PKG_VERSION").unwrap();
     let numeric = version
@@ -191,8 +200,8 @@ BEGIN
   BEGIN
     BLOCK "040904B0"
     BEGIN
-      VALUE "FileDescription", "Hex"
-      VALUE "ProductName", "Hex"
+      VALUE "FileDescription", "{product}"
+      VALUE "ProductName", "{product}"
       VALUE "FileVersion", "{version}"
       VALUE "ProductVersion", "{version}"
       VALUE "OriginalFilename", "hex.exe"
@@ -206,6 +215,7 @@ BEGIN
 END
 "#,
         icon = icon.display().to_string().replace('\\', "/"),
+        product = product,
     );
     let resource = output_dir.join("hex.rc");
     std::fs::write(&resource, script).expect("write the Windows resource script");

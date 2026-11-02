@@ -1,0 +1,179 @@
+name: Nexus Voice release
+
+# Builds the office edition (edition/README.md) for Windows x64 and macOS
+# (Apple silicon) and publishes them as one GitHub release on this fork.
+# Run it from the Actions tab ("Run workflow"), or push a tag nexus-v<anything>.
+#
+# The builds are unsigned: Windows shows SmartScreen's "More info, Run anyway"
+# and macOS asks for "Open Anyway" once (edition/INSTALL.md). Sign them before
+# a company-wide rollout (edition/README.md, "Signing").
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: What changed, for the release page (optional)
+        required: false
+        default: ""
+  push:
+    tags: ["nexus-v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nexus-voice-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  HEX_EDITION_NAME: Nexus Voice
+  HEX_EDITION_BUNDLE_ID: nexus.voice
+
+jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      tag: ${{ steps.v.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: v
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = tag ]; then
+            echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=nexus-v${version}-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+  windows:
+    name: Windows x64
+    needs: version
+    runs-on: windows-latest
+    timeout-minutes: 120
+    env:
+      HEX_VERSION: ${{ needs.version.outputs.version }}
+      HEX_WINDOWS_ARCH: x86_64
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: source
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          workspaces: source -> target
+          key: nexus-voice
+          cache-on-failure: true
+      - name: Install the Vulkan SDK
+        uses: humbletim/install-vulkan-sdk@30ba978f977e81b72d091fc8888feb1fb26f9aff # v1.2
+        with:
+          version: 1.4.309.0
+          cache: true
+      - name: Install SPIRV-Headers for the Vulkan backend
+        shell: pwsh
+        run: |
+          vcpkg install spirv-headers:x64-windows
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg install spirv-headers failed" }
+          $prefix = "$env:VCPKG_INSTALLATION_ROOT/installed/x64-windows" -replace '\\','/'
+          $combined = if ($env:CMAKE_PREFIX_PATH) { "$prefix;$env:CMAKE_PREFIX_PATH" } else { $prefix }
+          Add-Content $env:GITHUB_ENV "CMAKE_PREFIX_PATH=$combined"
+      - name: Build hex.exe
+        shell: bash
+        run: |
+          export HEX_RELEASE_DIST="$(cygpath -u "$RUNNER_TEMP")/dist"
+          source/scripts/build-windows.sh
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $exe = "$env:RUNNER_TEMP/dist/hex-$env:HEX_VERSION-windows-x64.exe"
+          $setup = & source/edition/windows/build-installer.ps1 -Executable $exe -Version $env:HEX_VERSION -Arch x86_64 -OutDir "$env:RUNNER_TEMP/out"
+          Copy-Item $exe "$env:RUNNER_TEMP/out/nexus-voice-$env:HEX_VERSION-windows-x64-portable.exe"
+          Get-ChildItem "$env:RUNNER_TEMP/out"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: nexus-voice-windows
+          path: ${{ runner.temp }}/out/*.exe
+          if-no-files-found: error
+
+  macos:
+    name: macOS arm64
+    needs: version
+    runs-on: macos-26
+    timeout-minutes: 120
+    env:
+      HEX_RELEASE_UNSIGNED: "1"
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          key: nexus-voice
+          cache-on-failure: true
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+      - name: Install the Metal toolchain
+        run: xcrun --sdk macosx metal --version || xcodebuild -downloadComponent MetalToolchain
+      - name: Build Nexus Voice.app
+        run: |
+          scripts/setup.sh
+          bundle=$(scripts/build-app.sh)
+          "$bundle/Contents/MacOS/hex" --version
+          scripts/smoke-macos-app.sh "$bundle"
+          mkdir -p dist/staging out
+          /usr/bin/ditto "$bundle" "dist/staging/$(basename "$bundle")"
+          ln -s /Applications dist/staging/Applications
+          hdiutil create -quiet -fs APFS -format ULFO -volname "$HEX_EDITION_NAME" \
+            -srcfolder dist/staging "out/nexus-voice-$VERSION-macos-arm64.dmg"
+          /usr/bin/ditto -c -k --keepParent "$bundle" "out/nexus-voice-$VERSION-macos-arm64.zip"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: nexus-voice-macos
+          path: out/*
+          if-no-files-found: error
+
+  publish:
+    needs: [version, windows, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: out
+          merge-multiple: true
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.version.outputs.tag }}
+          VERSION: ${{ needs.version.outputs.version }}
+          NOTES: ${{ inputs.notes }}
+        run: |
+          cd out
+          sha256sum * > SHA256SUMS
+          {
+            echo "## Nexus Voice $VERSION"
+            echo
+            [ -n "$NOTES" ] && { echo "$NOTES"; echo; }
+            echo "Private, on-device dictation: hold a key, speak, and it types for you."
+            echo
+            echo "- **Windows:** run \`nexus-voice-setup-$VERSION-windows-x64.exe\`. At the SmartScreen warning choose *More info → Run anyway*."
+            echo "- **Mac (Apple silicon):** open the DMG, drag **Nexus Voice** to Applications, then right-click it → *Open* (or System Settings → Privacy & Security → *Open Anyway*)."
+            echo
+            echo "Install guide: [edition/INSTALL.md](https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/edition/INSTALL.md) · Based on [Hex](https://github.com/anomalyco/hex) (MIT)."
+          } > notes.md
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "Nexus Voice $VERSION" --notes-file notes.md --latest \
+            $(ls | grep -v notes.md)

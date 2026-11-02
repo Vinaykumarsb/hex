@@ -28,6 +28,8 @@ else
   app_name=Hex
   bundle_id=anomaly.hex
 fi
+# An office edition renames the app and brings its own icon (edition/README.md).
+[ -n "${HEX_EDITION_NAME:-}" ] && . "$root/edition/macos.sh"
 # Every build carries the `capture` experiment (dormant until enabled), with
 # Scrawl's `scrawl-helper` beside `hex`, where the engine looks for it.
 # crates/capture/build.rs compiles the helper from crates/capture/helper into
@@ -104,6 +106,7 @@ xcrun actool "$root/app/AppIcon.icon" \
   --warnings \
   --notices >&2
 cp "$icon_output/AppIcon.icns" "$icon_output/Assets.car" "$bundle/Contents/Resources/"
+[ -n "${HEX_EDITION_NAME:-}" ] && edition_finish_bundle
 
 sign "$bundle/Contents/Library/HexMicrophone.driver"
 # Hex runs it only to decode the capture's movie, which needs no

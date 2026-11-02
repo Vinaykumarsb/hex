@@ -289,12 +289,49 @@ fn footer(ui: &Ui, p: Paint) -> El {
     col()
         .key("footer")
         .mt(8.0)
+        .children(edition_mark(p))
         .child(version_line(
             ui,
             p,
             line("version", &version_label(), p.faint()),
         ))
         .children(status)
+}
+
+/// An office edition (`crate::edition`) names itself above the version, with
+/// the engine it runs on: "Nexus Voice", then "powered by Hex". Hex itself
+/// draws nothing here, so the goldens never change.
+fn edition_mark(p: Paint) -> Option<El> {
+    let name = crate::edition::name()?;
+    let c = &p.k.c;
+    Some(
+        col()
+            .key("edition")
+            .px(6.0)
+            .pb(4.0)
+            .gap(1.0)
+            .child(
+                row()
+                    .key("edition-name")
+                    .gap(6.0)
+                    .center_y()
+                    .child(controls::status_dot(c.icon_accent))
+                    .child(
+                        text(name)
+                            .key("label")
+                            .font(p.k.ty.small_medium)
+                            .color(c.text_strong)
+                            .truncate(),
+                    ),
+            )
+            .child(
+                text("powered by Hex")
+                    .key("edition-engine")
+                    .font(p.k.ty.small)
+                    .color(p.faint())
+                    .pl(14.0),
+            ),
+    )
 }
 
 /// A local or test build marks itself beside the version, quietly: an outline

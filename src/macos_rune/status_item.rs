@@ -199,7 +199,10 @@ pub fn install() -> Result<Receiver<StatusItemAction>> {
         MainThreadMarker::new().ok_or_else(|| eyre!("status item requires the main thread"))?;
     let (actions, receiver) = sync_channel(8);
     let target = StatusItemTarget::new(actions, mtm);
-    let menu = NSMenu::initWithTitle(NSMenu::alloc(mtm), &NSString::from_str("Hex"));
+    let menu = NSMenu::initWithTitle(
+        NSMenu::alloc(mtm),
+        &NSString::from_str(crate::app_paths::app_name()),
+    );
     let meeting_status = add_item(
         &menu,
         &target,

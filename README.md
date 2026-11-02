@@ -1,5 +1,10 @@
 # Hex
 
+> **Nexus Voice** is this fork's office edition of Hex for Windows and Mac.
+> Download it from [Releases](https://github.com/Vinaykumarsb/hex/releases/latest);
+> see [edition/INSTALL.md](edition/INSTALL.md) to install and
+> [edition/README.md](edition/README.md) to build, release, and follow upstream.
+
 Hex is local voice dictation for Mac, Windows and Linux. Hold a key, speak, and
 it pastes.
 

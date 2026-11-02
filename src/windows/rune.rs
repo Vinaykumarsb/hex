@@ -664,7 +664,7 @@ fn create_tray(window: rune::AppHandle<Ui>) -> Result<rune::Tray> {
         tray_icon_pixels(taskbar_is_light()),
     );
     let view = TrayView::default();
-    let spec = rune::TraySpec::new("hex", "Hex", icon)
+    let spec = rune::TraySpec::new("hex", crate::edition::app_name(), icon)
         .tooltip(view.tooltip())
         .menu(view.menu());
     let tray = rune::Tray::new(spec, move |event| match event {

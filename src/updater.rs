@@ -462,10 +462,13 @@ impl Updater {
 }
 
 /// Whether an administrator turned updates off (`DisableUpdates`), read
-/// once per launch so a managed value applies at the next one.
+/// once per launch so a managed value applies at the next one. An office
+/// edition (`crate::edition`) is always managed: its organization hands it
+/// out, and Anomaly's release service would replace it with Hex.
 pub fn managed_by_policy() -> bool {
     static MANAGED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    *MANAGED.get_or_init(platform::updates_disabled_by_policy)
+    *MANAGED
+        .get_or_init(|| crate::edition::name().is_some() || platform::updates_disabled_by_policy())
 }
 
 /// Shown in place of update actions when an administrator turned them off.

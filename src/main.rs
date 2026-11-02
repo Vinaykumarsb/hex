@@ -25,6 +25,7 @@ mod dev_build;
 #[cfg_attr(any(target_os = "linux", target_os = "windows"), allow(dead_code))]
 mod dictation;
 mod durable;
+mod edition;
 #[cfg(any(target_os = "macos", target_os = "linux", target_os = "windows"))]
 mod feedback;
 mod history;

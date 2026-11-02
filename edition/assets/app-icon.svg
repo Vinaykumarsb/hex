@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Nexus Voice app icon: a voice waveform whose peaks are joined like a network. -->
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#20242E"/>
+      <stop offset="1" stop-color="#0B0D12"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.52" r="0.48">
+      <stop offset="0" stop-color="#FF7A1A" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#FF7A1A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bar" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#FF5A1F"/>
+      <stop offset="1" stop-color="#FFC15A"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#plate)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#glow)"/>
+  <rect x="66" y="66" width="892" height="892" rx="198" fill="none" stroke="url(#rim)" stroke-width="4"/>
+  <!-- network line through the peaks -->
+  <polyline points="312,452 412,372 512,292 612,372 712,452" fill="none" stroke="#FFC15A" stroke-opacity="0.55" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- waveform bars -->
+  <rect x="282" y="452" width="60" height="200" rx="30" fill="url(#bar)"/>
+  <rect x="382" y="372" width="60" height="360" rx="30" fill="url(#bar)"/>
+  <rect x="482" y="292" width="60" height="520" rx="30" fill="url(#bar)"/>
+  <rect x="582" y="372" width="60" height="360" rx="30" fill="url(#bar)"/>
+  <rect x="682" y="452" width="60" height="200" rx="30" fill="url(#bar)"/>
+  <!-- nodes -->
+  <g fill="#FFF4E0">
+    <circle cx="312" cy="452" r="22"/>
+    <circle cx="412" cy="372" r="22"/>
+    <circle cx="512" cy="292" r="26"/>
+    <circle cx="612" cy="372" r="22"/>
+    <circle cx="712" cy="452" r="22"/>
+  </g>
+</svg>

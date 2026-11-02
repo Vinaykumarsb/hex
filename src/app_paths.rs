@@ -24,7 +24,7 @@ pub fn app_name() -> &'static str {
     if is_macos_test_build() {
         "Hex Test"
     } else {
-        "Hex"
+        crate::edition::app_name()
     }
 }
 

@@ -1,0 +1,331 @@
+<title>Nexus Voice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,500;125,700;125,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow engineered column; the hero is a working push-to-talk demo, everything else is quiet spec-sheet type. */
+:root {
+  --ground: #F3F4F6;
+  --panel: #FFFFFF;
+  --ink: #15171C;
+  --muted: #5D6270;
+  --line: #DCDFE5;
+  --ember: #E8590C;
+  --ember-hot: #FF8A3D;
+  --ember-soft: #FDEBDD;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0D0F13; --panel: #161921; --ink: #ECEEF2; --muted: #9399A6;
+    --line: #262A34; --ember: #FF7A1A; --ember-hot: #FFC15A; --ember-soft: #2A1A10;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0D0F13; --panel: #161921; --ink: #ECEEF2; --muted: #9399A6;
+  --line: #262A34; --ember: #FF7A1A; --ember-hot: #FFC15A; --ember-soft: #2A1A10;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground); color: var(--ink);
+  font: 400 16px/1.6 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  max-width: 1040px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+a { color: inherit; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; border-radius: 6px; }
+
+header.top { padding-block: 22px; }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand svg { width: 34px; height: 34px; flex: none; }
+.brand b { font: 700 17px/1 var(--display); font-stretch: 125%; letter-spacing: -0.01em; }
+.top nav { display: flex; gap: 20px; font-size: 14px; color: var(--muted); }
+.top nav a { text-decoration: none; }
+.top nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero { padding-block: 40px 56px; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+.hero .copy { min-width: 0; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ember); }
+h1 {
+  font: 800 clamp(40px, 6.4vw, 72px)/0.95 var(--display); font-stretch: 125%;
+  letter-spacing: -0.035em; margin: 16px 0 20px; text-wrap: balance;
+}
+h1 em { font-style: normal; color: var(--ember); }
+.lede { font-size: 18px; color: var(--muted); max-width: 34ch; margin: 0 0 28px; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+  font: 600 15px/1 var(--body); padding: 14px 18px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  transition: transform .15s ease, border-color .15s ease;
+}
+.btn:hover { transform: translateY(-1px); border-color: var(--muted); }
+.btn.primary { background: var(--ember); border-color: var(--ember); color: #FFFFFF; }
+.btn.primary:hover { border-color: var(--ember); filter: brightness(1.06); }
+.btn small { font: 400 12px/1 var(--mono); opacity: .8; }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.fine { margin-top: 14px; font: 400 12.5px/1.5 var(--mono); color: var(--muted); }
+
+/* Demo */
+.demo {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+  padding: 18px; min-width: 0;
+  box-shadow: 0 30px 60px -40px rgba(232, 89, 12, .45);
+}
+.mail { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.mail .bar { display: flex; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.mail .bar i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.mail .field { display: flex; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.mail .field span:first-child { color: var(--muted); width: 54px; flex: none; }
+.mail .body { padding: 14px; min-height: 132px; font-size: 15px; line-height: 1.55; overflow-wrap: anywhere; }
+.caret { display: inline-block; width: 2px; height: 1.1em; background: var(--ember); vertical-align: -0.18em; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.ghost { color: var(--muted); }
+
+.ptt { display: flex; align-items: center; gap: 14px; margin-top: 16px; }
+.key {
+  flex: none; font: 500 13px/1 var(--mono); color: var(--ink);
+  min-width: 108px; height: 54px; padding: 0 14px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--ground); cursor: pointer;
+  box-shadow: 0 4px 0 var(--line); transition: transform .08s ease, box-shadow .08s ease, background .2s;
+  user-select: none; touch-action: none;
+}
+.key[aria-pressed="true"] { transform: translateY(3px); box-shadow: 0 1px 0 var(--line); background: var(--ember-soft); border-color: var(--ember); }
+.meter { flex: 1; min-width: 0; height: 54px; display: flex; align-items: center; gap: 4px; }
+.meter b { flex: 1; height: 6px; border-radius: 3px; background: var(--line); transition: height .09s ease, background .2s; }
+.live .meter b { background: linear-gradient(to top, var(--ember), var(--ember-hot)); }
+.status { margin-top: 10px; font: 400 12.5px/1.4 var(--mono); color: var(--muted); }
+.status strong { color: var(--ember); font-weight: 500; }
+
+/* Sections */
+section.band { padding-block: 56px; border-top: 1px solid var(--line); }
+h2 { font: 700 clamp(26px, 3.4vw, 34px)/1.05 var(--display); font-stretch: 125%; letter-spacing: -0.02em; margin: 0 0 28px; text-wrap: balance; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; list-style: none; padding: 0; margin: 0; counter-reset: s; }
+.steps li { min-width: 0; counter-increment: s; }
+.steps li::before {
+  content: counter(s); display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  border: 1.5px solid var(--ember); color: var(--ember); font: 500 13px/1 var(--mono); margin-bottom: 14px;
+}
+.steps h3, .facts h3 { font: 600 17px/1.3 var(--body); margin: 0 0 6px; }
+.steps p, .facts p { margin: 0; color: var(--muted); font-size: 15px; }
+kbd { font: 500 12.5px/1 var(--mono); padding: 3px 6px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; background: var(--panel); color: var(--ink); white-space: nowrap; }
+
+.facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+.facts > div { padding: 22px; min-width: 0; border-bottom: 1px solid var(--line); }
+.facts > div:nth-child(odd) { border-right: 1px solid var(--line); }
+.facts > div:nth-last-child(-n+2) { border-bottom: 0; }
+.spec { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ember); display: block; margin-bottom: 10px; }
+
+.install { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+.install > div { min-width: 0; }
+.install h3 { font: 700 19px/1.2 var(--display); font-stretch: 112%; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; }
+.install h3 svg { width: 20px; height: 20px; }
+.install ol { margin: 0; padding-left: 20px; color: var(--muted); font-size: 15px; display: grid; gap: 8px; }
+.install ol b { color: var(--ink); font-weight: 600; }
+.install code { font: 400 13px var(--mono); background: var(--panel); border: 1px solid var(--line); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; color: var(--ink); }
+
+footer { padding-block: 32px 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 820px) {
+  .hero .wrap { grid-template-columns: 1fr; gap: 32px; }
+  .steps, .install { grid-template-columns: 1fr; }
+  .facts { grid-template-columns: 1fr; }
+  .facts > div:nth-child(odd) { border-right: 0; }
+  .facts > div:nth-last-child(2) { border-bottom: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .caret { animation: none; }
+  .btn, .key, .meter b { transition: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="nv-plate" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#20242E"/><stop offset="1" stop-color="#0B0D12"/></linearGradient>
+    <linearGradient id="nv-bar" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF5A1F"/><stop offset="1" stop-color="#FFC15A"/></linearGradient>
+    <symbol id="nv-mark" viewBox="64 64 896 896">
+      <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#nv-plate)"/>
+      <polyline points="312,452 412,372 512,292 612,372 712,452" fill="none" stroke="#FFC15A" stroke-opacity="0.55" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="282" y="452" width="60" height="200" rx="30" fill="url(#nv-bar)"/>
+      <rect x="382" y="372" width="60" height="360" rx="30" fill="url(#nv-bar)"/>
+      <rect x="482" y="292" width="60" height="520" rx="30" fill="url(#nv-bar)"/>
+      <rect x="582" y="372" width="60" height="360" rx="30" fill="url(#nv-bar)"/>
+      <rect x="682" y="452" width="60" height="200" rx="30" fill="url(#nv-bar)"/>
+      <g fill="#FFF4E0"><circle cx="312" cy="452" r="22"/><circle cx="412" cy="372" r="22"/><circle cx="512" cy="292" r="26"/><circle cx="612" cy="372" r="22"/><circle cx="712" cy="452" r="22"/></g>
+    </symbol>
+    <symbol id="i-win" viewBox="0 0 24 24"><path fill="currentColor" d="M3 5.1 10.4 4v7.2H3zm0 13.8 7.4 1.1v-7.1H3zm8.2 1.2L21 21.5v-8.6h-9.8zm0-16.2v7.3H21V2.5z"/></symbol>
+    <symbol id="i-mac" viewBox="0 0 24 24"><path fill="currentColor" d="M16.4 12.6c0-2.5 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.8A4.9 4.9 0 0 0 3.7 9.5c-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.3 0 1.7-.8 3.3-.8 1.5 0 1.9.8 3.3.8 1.4 0 2.2-1.2 3-2.5a10 10 0 0 0 1.4-2.8c-.1 0-2.7-1-2.7-4.2zM14 5.2c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1 .1 2.1-.6 2.8-1.4z"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="Nexus Voice home"><svg aria-hidden="true"><use href="#nv-mark"/></svg><b>Nexus Voice</b></a>
+    <nav aria-label="Sections"><a href="#how">How it works</a><a href="#privacy">Privacy</a><a href="#install">Install</a></nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div class="copy">
+        <span class="eyebrow">Dictation for the office</span>
+        <h1>Hold a key.<br>Say it.<br><em>It's typed.</em></h1>
+        <p class="lede">Nexus Voice turns speech into text in Outlook, Teams, Word, or any field with a cursor. It runs on your own computer, so nothing you say leaves it.</p>
+        <div class="ctas">
+          <a class="btn primary" href="https://github.com/Vinaykumarsb/hex/releases/latest"><svg aria-hidden="true"><use href="#i-win"/></svg>Download for Windows <small>x64</small></a>
+          <a class="btn" href="https://github.com/Vinaykumarsb/hex/releases/latest"><svg aria-hidden="true"><use href="#i-mac"/></svg>Download for Mac <small>Apple silicon</small></a>
+        </div>
+        <p class="fine">Free · works offline after setup · built on Hex (MIT)</p>
+      </div>
+
+      <div class="demo" id="demo" aria-label="Try it: hold the key to dictate an example email">
+        <div class="mail">
+          <div class="bar" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="field"><span>To</span><span>Production planning</span></div>
+          <div class="field"><span>Subject</span><span>Connector samples for Thursday</span></div>
+          <div class="body" id="out" aria-live="polite"><span class="ghost">Hold the key below, as you would hold Ctrl+Space, and watch the text appear.</span></div>
+        </div>
+        <div class="ptt">
+          <button class="key" id="key" type="button" aria-pressed="false">Ctrl + Space</button>
+          <div class="meter" id="meter" aria-hidden="true"></div>
+        </div>
+        <div class="status" id="status">Ready · <strong>hold</strong> to talk, release to paste</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="how">
+    <div class="wrap">
+      <h2>Three moves, no new app to learn</h2>
+      <ol class="steps">
+        <li><h3>Hold the shortcut</h3><p><kbd>Ctrl</kbd> + <kbd>Space</kbd> on Windows, <kbd>Option</kbd> on a Mac. You can change it in General.</p></li>
+        <li><h3>Speak normally</h3><p>Full sentences, part numbers, names. A small indicator at the top of the screen shows it's listening.</p></li>
+        <li><h3>Let go</h3><p>The text lands where your cursor is. Tap twice for hands-free, then press once to finish.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band" id="privacy">
+    <div class="wrap">
+      <h2>Built to stay on your desk</h2>
+      <div class="facts">
+        <div><span class="spec">On-device</span><h3>Your voice never leaves the laptop</h3><p>The speech model runs locally. After a one-time model download, dictation works with Wi-Fi off.</p></div>
+        <div><span class="spec">No audio kept</span><h3>Recordings are discarded</h3><p>Audio is thrown away once it's transcribed. Only the text is kept in History, for 7 days, on your computer.</p></div>
+        <div><span class="spec">Any app</span><h3>Types where you're working</h3><p>It pastes like a keyboard would, so Outlook, Teams, SAP, browsers, and Word all work without plug-ins.</p></div>
+        <div><span class="spec">Many languages</span><h3>Speak the language you write in</h3><p>English, German, French, Spanish, Polish, Chinese, Japanese and many more. Pick your language and speech model in General.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="install">
+    <div class="wrap">
+      <h2>Install in two minutes</h2>
+      <div class="install">
+        <div>
+          <h3><svg aria-hidden="true"><use href="#i-win"/></svg>Windows 10 and 11</h3>
+          <ol>
+            <li>Run <code>nexus-voice-setup-…-windows-x64.exe</code>.</li>
+            <li>If you see "Windows protected your PC", choose <b>More info</b>, then <b>Run anyway</b>.</li>
+            <li>Follow setup. It downloads the speech model once.</li>
+            <li>Find it in the tray by the clock. Right-click for the menu.</li>
+          </ol>
+        </div>
+        <div>
+          <h3><svg aria-hidden="true"><use href="#i-mac"/></svg>Mac with Apple silicon</h3>
+          <ol>
+            <li>Open the DMG and drag <b>Nexus Voice</b> to Applications.</li>
+            <li>Open it. If macOS can't check it, go to <b>System Settings › Privacy &amp; Security</b> and choose <b>Open Anyway</b>.</li>
+            <li>Allow <b>Microphone</b> and <b>Accessibility</b> so it can type for you.</li>
+            <li>It lives in the menu bar.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Nexus Voice · an office edition of <a href="https://github.com/anomalyco/hex">Hex</a>, MIT licensed</span>
+    <span>Questions or problems: <a href="https://github.com/Vinaykumarsb/hex/issues">open an issue</a> or ask Vinay</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var key = document.getElementById('key');
+  var out = document.getElementById('out');
+  var status = document.getElementById('status');
+  var meter = document.getElementById('meter');
+  var demo = document.getElementById('demo');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lines = [
+    'Hi team, the 12-pin connector samples arrive Thursday morning. Can we run the crimp height check before lunch and send results to quality by 3 pm? Thanks.',
+    'Quick update: line 4 is back up after the tooling change. Scrap rate is under half a percent since this morning. I will share the full numbers on Friday.',
+    'Could you book the lab for Tuesday at 10? We need about two hours for the vibration test on the new harness.'
+  ];
+  var bars = [];
+  for (var i = 0; i < 28; i++) { var b = document.createElement('b'); meter.appendChild(b); bars.push(b); }
+  var holding = false, n = 0, raf = 0, words = [], shown = 0, timer = 0;
+
+  function animate(t) {
+    for (var i = 0; i < bars.length; i++) {
+      var h = holding ? 8 + Math.abs(Math.sin(t / 140 + i * 0.7) * Math.cos(t / 330 + i * 0.3)) * 42 : 6;
+      bars[i].style.height = h.toFixed(1) + 'px';
+    }
+    if (holding) raf = requestAnimationFrame(animate);
+  }
+  function render(typed) {
+    out.textContent = '';
+    var span = document.createElement('span');
+    span.textContent = typed;
+    out.appendChild(span);
+    var c = document.createElement('span'); c.className = 'caret'; out.appendChild(c);
+  }
+  function start(e) {
+    if (holding) return;
+    if (e) e.preventDefault();
+    holding = true; key.setAttribute('aria-pressed', 'true'); demo.classList.add('live');
+    words = lines[n % lines.length].split(' '); shown = 0;
+    status.innerHTML = '<strong>Listening</strong> · keep holding while you speak';
+    if (!reduce) raf = requestAnimationFrame(animate);
+    clearInterval(timer);
+    timer = setInterval(function () { if (shown < words.length) shown++; }, 140);
+  }
+  function stop() {
+    if (!holding) return;
+    holding = false; key.setAttribute('aria-pressed', 'false'); demo.classList.remove('live');
+    cancelAnimationFrame(raf); animate(0); clearInterval(timer);
+    var heard = Math.max(shown, Math.min(words.length, 6));
+    status.innerHTML = '<strong>Transcribing</strong> on this computer…';
+    setTimeout(function () {
+      var text = words.slice(0, heard).join(' ');
+      if (heard < words.length) text += '…';
+      render(text);
+      n++;
+      status.innerHTML = 'Pasted · hold again for another example';
+    }, 380);
+  }
+  key.addEventListener('pointerdown', start);
+  key.addEventListener('pointerup', stop);
+  key.addEventListener('pointerleave', stop);
+  key.addEventListener('pointercancel', stop);
+  key.addEventListener('keydown', function (e) { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) start(e); });
+  key.addEventListener('keyup', function (e) { if (e.key === ' ' || e.key === 'Enter') stop(); });
+  animate(0);
+})();
+</script>
