@@ -127,3 +127,65 @@ A new version is a new release: upload its installer as a new app version
   people can't remove IT's copy.
 - Hex's log (`%APPDATA%\hex\logs\process.log`, `~/Library/Application Support/hex/logs/process.log`)
   records the SHA-256 check on first use.
+
+## 5. Lock settings (policy)
+
+IT sets these centrally; people see the feature off and can't turn it on.
+They read as **off** when unset.
+
+| Key | Effect | Recommended for rollout |
+| --- | --- | --- |
+| `ManagedModelsOnly` | Never download a speech model; use only IT's models | **On** |
+| `DisableLabs` | All experimental (Labs) features off | **On** |
+| `DisableOpenCodeProcessing` | No AI rewriting through OpenCode | **On** |
+| `DisableTransforms` | No text transformations or user scripts | **On** |
+| `RestrictTransformsToLoopback` | Transformations allowed, but only reach this computer and run no programs | Instead of the line above, if you want them |
+| `DisableMeetings` | No meeting recording | Your call (legal/works council) |
+| `DisableAnnotate` | No screen-recording captures | Your call |
+
+- **Windows:** Intune → Devices → Configuration → *Import ADMX*: upload
+  `policy/NexusVoice.admx` and `policy/en-US/NexusVoice.adml`, then create
+  a profile from *Templates → Imported Administrative templates* and enable
+  the policies above. They land as DWORDs under
+  `HKLM\SOFTWARE\Policies\Nexus Voice`, which only administrators can
+  write. (Group Policy works too: copy both files to the PolicyDefinitions
+  store.)
+- **Mac:** Intune → Devices → macOS → Configuration → *Templates → Custom*:
+  upload `policy/nexus-voice.mobileconfig` (it turns on the four
+  recommended keys; edit it to change that). macOS reads them as forced
+  managed preferences in the `nexus.voice` domain; a value a person writes
+  with `defaults write` locks nothing.
+
+The app logs the locks it found at start ("features managed by your
+organization") in `process.log`.
+
+## Rolling out to thousands of laptops
+
+```ts
+Ring 0  IT + you (10)          ── a week: install, models, policy, every app people dictate into
+Ring 1  one office (100–200)   ── two weeks: helpdesk questions, odd hardware, VPN/proxy
+Ring 2  everyone (by region)   ── Intune assignment groups, one region at a time
+```
+
+- **Before Ring 1:** sign the Windows installer with TE's code-signing
+  certificate and the Mac app with a Developer ID (edition/README.md,
+  "Signing"). Unsigned builds work but train people to click through
+  security warnings, which security teams rightly dislike at this scale.
+- **Hardware floor:** the Windows build needs a Vulkan graphics driver
+  (any NVIDIA, AMD, or Intel driver from the last few years). Laptops
+  without one fail the installer's check; find them in Ring 1.
+- **Disk:** about 1.5 GB per laptop for the default models, installed once
+  by Intune (BITS downloads in the background and resumes).
+- **Network:** in this setup the app shouldn't need the internet: models
+  come from Intune, updates are off, and the locks above turn off the
+  optional network features. Block Hugging Face and Anomaly's servers, and
+  confirm in Ring 0 with a firewall log that nothing else is contacted.
+- **Updates:** a new Nexus Voice version is a new Intune app version. Roll
+  it through the same rings. The daily upstream review flags when one is
+  worth releasing (edition/UPSTREAM.md).
+- **Support:** each laptop keeps its own logs (`%APPDATA%\hex\logs`,
+  `~/Library/Application Support/hex/logs`); nothing is collected
+  centrally, so helpdesk asks for `process.log` when something fails.
+- **Data protection:** dictated text is kept for 7 days in History on the
+  laptop only (people can turn it off or clear it); no audio is stored.
+  Give your DPO / works council this page and `edition/README.md`.

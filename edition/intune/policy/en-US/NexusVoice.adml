@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitionResources xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="1.0" schemaVersion="1.0" xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <displayName>Nexus Voice</displayName>
+  <description>Policies for Nexus Voice, on-device dictation.</description>
+  <resources>
+    <stringTable>
+      <string id="NexusVoice">Nexus Voice</string>
+      <string id="SUPPORTED_WIN10">Windows 10 and later</string>
+      <string id="ManagedModelsOnly">Use only the speech models IT installs</string>
+      <string id="ManagedModelsOnly_Help">Nexus Voice never downloads a speech model. People can use only the models IT installs in %ProgramData%\Nexus Voice\models (Install-NexusVoiceModels.ps1). Recommended for managed rollouts.</string>
+      <string id="DisableLabs">Turn off Labs features</string>
+      <string id="DisableLabs_Help">Every Labs (experimental) feature stays off, and people can't turn one on.</string>
+      <string id="DisableOpenCodeProcessing">Turn off AI rewriting with OpenCode</string>
+      <string id="DisableOpenCodeProcessing_Help">Dictation is never sent to OpenCode for rewriting, meeting notes, or Annotate sends.</string>
+      <string id="DisableTransforms">Turn off text transformations</string>
+      <string id="DisableTransforms_Help">No transformations run, built in or from a person's hex.config.ts.</string>
+      <string id="RestrictTransformsToLoopback">Keep transformations on this computer</string>
+      <string id="RestrictTransformsToLoopback_Help">Transformations stay on, but they may only reach this computer over the network and can't run programs.</string>
+      <string id="DisableMeetings">Turn off meeting recording</string>
+      <string id="DisableMeetings_Help">No new meeting recordings or meeting processing.</string>
+      <string id="DisableAnnotate">Turn off Annotate (screen captures)</string>
+      <string id="DisableAnnotate_Help">Annotate's screen recordings are turned off.</string>
+    </stringTable>
+  </resources>
+</policyDefinitionResources>

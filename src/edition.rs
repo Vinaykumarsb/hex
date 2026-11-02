@@ -35,7 +35,11 @@ pub fn managed_models_dir() -> Option<std::path::PathBuf> {
         let data = std::env::var_os("ProgramData").unwrap_or_else(|| r"C:\ProgramData".into());
         Some(std::path::PathBuf::from(data).join(name).join("models"))
     } else if cfg!(target_os = "macos") {
-        Some(std::path::Path::new("/Library/Application Support").join(name).join("models"))
+        Some(
+            std::path::Path::new("/Library/Application Support")
+                .join(name)
+                .join("models"),
+        )
     } else {
         let folder = name.to_lowercase().replace(' ', "-");
         Some(std::path::Path::new("/opt").join(folder).join("models"))
@@ -62,6 +66,26 @@ pub fn model_mirror() -> Option<&'static str> {
         .filter(|url| url.starts_with("https://"))
 }
 
+/// The macOS managed-preferences domain an edition also reads policy from:
+/// its bundle identifier (`HEX_EDITION_BUNDLE_ID`, else `nexus.voice`).
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
+pub fn policy_domain() -> Option<&'static str> {
+    name()?;
+    Some(
+        option_env!("HEX_EDITION_BUNDLE_ID")
+            .filter(|id| !id.is_empty())
+            .unwrap_or("nexus.voice"),
+    )
+}
+
+/// Whether the organization allows only the models it installed
+/// (`ManagedModelsOnly`, crate::policy): an edition then never downloads a
+/// speech model, from a mirror or anywhere else.
+pub fn managed_models_only() -> bool {
+    static ONLY: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    name().is_some() && *ONLY.get_or_init(|| crate::policy::forced("ManagedModelsOnly"))
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -72,6 +96,8 @@ mod tests {
             assert_eq!(super::managed_models_dir(), None);
             assert_eq!(super::managed_model("model.gguf", 1), None);
             assert_eq!(super::model_mirror(), None);
+            assert_eq!(super::policy_domain(), None);
+            assert!(!super::managed_models_only());
         }
     }
 }

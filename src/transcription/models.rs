@@ -1093,6 +1093,10 @@ fn download_artifact(
     downloaded_bytes: &AtomicU64,
     stage: &AtomicU8,
 ) -> Result<PathBuf> {
+    // An office edition's organization may allow only the models it installs.
+    if crate::edition::managed_models_only() {
+        bail!("Your organization installs {name}. Ask IT to add it to this computer.");
+    }
     ModelPreparationStage::Downloading.store(stage);
     check_canceled(canceled)?;
     let directory = models_dir()?;

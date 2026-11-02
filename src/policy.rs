@@ -4,7 +4,8 @@
 //! `DisableLabs`, plus `RestrictTransformsToLoopback`, which keeps
 //! transformations on but holds their `fetch` to this computer and runs no
 //! programs. Only a value the profile forces counts, so a key a person
-//! wrote with `defaults write` locks nothing. Other OSes have no locks.
+//! wrote with `defaults write` locks nothing. Windows reads them from
+//! `SOFTWARE\Policies` (Intune, Group Policy); Linux has no locks.
 //!
 //! The policy is read once per process. A locked feature reads as off
 //! everywhere without its saved setting changing: `AppSettings` turns its
@@ -12,6 +13,8 @@
 //! ([`Policy::enforce`], [`Policy::keep_saved`]); work that follows a list
 //! rather than a switch (mode rewrites, transformations, Annotate's sends,
 //! the transformation host) checks [`Policy::locks`] where it starts.
+//!
+//! Windows reads the same keys from the registry's Policies key (below).
 
 use std::sync::OnceLock;
 
@@ -181,6 +184,12 @@ impl Policy {
     }
 }
 
+/// Whether the organization forces managed key `key` on, for checks that
+/// live outside [`Lock`] (an office edition's own keys, `crate::edition`).
+pub fn forced(key: &str) -> bool {
+    platform::forced(key)
+}
+
 #[cfg(target_os = "macos")]
 mod platform {
     use objc2_core_foundation::{
@@ -189,10 +198,17 @@ mod platform {
 
     const DOMAIN: &str = "anomaly.hex";
 
-    /// Whether a configuration profile forces `key` to true.
+    /// Whether a configuration profile forces `key` to true, in Hex's domain
+    /// or an office edition's own (its bundle identifier).
     pub fn forced(key: &str) -> bool {
+        std::iter::once(DOMAIN)
+            .chain(crate::edition::policy_domain())
+            .any(|domain| forced_in(key, domain))
+    }
+
+    fn forced_in(key: &str, domain: &str) -> bool {
         let key = CFString::from_str(key);
-        let domain = CFString::from_str(DOMAIN);
+        let domain = CFString::from_str(domain);
         if !CFPreferencesAppValueIsForced(&key, &domain) {
             return false;
         }
@@ -202,7 +218,35 @@ mod platform {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+/// Windows reads the same keys as DWORD values under
+/// `HKLM\SOFTWARE\Policies\Anomaly\Hex` (or an office edition's
+/// `SOFTWARE\Policies\<edition>`), and under the same paths in HKCU. Only
+/// administrators can write either Policies key, which is what Intune and
+/// Group Policy set; a nonzero value locks.
+#[cfg(target_os = "windows")]
+mod platform {
+    use winreg::RegKey;
+    use winreg::enums::{HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE};
+
+    const KEY: &str = r"SOFTWARE\Policies\Anomaly\Hex";
+
+    pub fn forced(name: &str) -> bool {
+        let edition = crate::edition::name().map(|edition| format!(r"SOFTWARE\Policies\{edition}"));
+        let paths = std::iter::once(KEY).chain(edition.as_deref());
+        paths.into_iter().any(|path| {
+            [HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER]
+                .into_iter()
+                .any(|hive| {
+                    RegKey::predef(hive)
+                        .open_subkey(path)
+                        .and_then(|key| key.get_value::<u32, _>(name))
+                        .is_ok_and(|value| value != 0)
+                })
+        })
+    }
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 mod platform {
     pub fn forced(_key: &str) -> bool {
         false

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Nexus Voice policies (edition/intune/README.md). Each sets a DWORD under
+     HKLM or HKCU\SOFTWARE\Policies\Nexus Voice, read by src/policy.rs. -->
+<policyDefinitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="1.0" schemaVersion="1.0" xmlns="http://schemas.microsoft.com/GroupPolicy/2006/07/PolicyDefinitions">
+  <policyNamespaces>
+    <target prefix="nexusvoice" namespace="NexusVoice.Policies" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0" />
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_WIN10" displayName="$(string.SUPPORTED_WIN10)" />
+    </definitions>
+  </supportedOn>
+  <categories>
+    <category name="NexusVoice" displayName="$(string.NexusVoice)" />
+  </categories>
+  <policies>
+    <policy name="ManagedModelsOnly" class="Both" displayName="$(string.ManagedModelsOnly)" explainText="$(string.ManagedModelsOnly_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="ManagedModelsOnly">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="DisableLabs" class="Both" displayName="$(string.DisableLabs)" explainText="$(string.DisableLabs_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="DisableLabs">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="DisableOpenCodeProcessing" class="Both" displayName="$(string.DisableOpenCodeProcessing)" explainText="$(string.DisableOpenCodeProcessing_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="DisableOpenCodeProcessing">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="DisableTransforms" class="Both" displayName="$(string.DisableTransforms)" explainText="$(string.DisableTransforms_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="DisableTransforms">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="RestrictTransformsToLoopback" class="Both" displayName="$(string.RestrictTransformsToLoopback)" explainText="$(string.RestrictTransformsToLoopback_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="RestrictTransformsToLoopback">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="DisableMeetings" class="Both" displayName="$(string.DisableMeetings)" explainText="$(string.DisableMeetings_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="DisableMeetings">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+    <policy name="DisableAnnotate" class="Both" displayName="$(string.DisableAnnotate)" explainText="$(string.DisableAnnotate_Help)" key="SOFTWARE\Policies\Nexus Voice" valueName="DisableAnnotate">
+      <parentCategory ref="NexusVoice" />
+      <supportedOn ref="SUPPORTED_WIN10" />
+      <enabledValue><decimal value="1" /></enabledValue>
+      <disabledValue><decimal value="0" /></disabledValue>
+    </policy>
+  </policies>
+</policyDefinitions>
