@@ -230,6 +230,10 @@ pub struct GgufArtifact {
 
 impl GgufArtifact {
     fn download_url(&self) -> String {
+        // An office edition downloads from its organization's mirror.
+        if let Some(mirror) = crate::edition::model_mirror() {
+            return format!("{mirror}/{}", self.filename);
+        }
         format!(
             "https://huggingface.co/{}/resolve/{}/{}",
             self.repository, self.revision, self.filename
@@ -780,6 +784,13 @@ pub fn model_path(model: &ModelDefinition) -> Result<PathBuf> {
     let ModelRuntime::Gguf(artifact) = model.runtime else {
         bail!("{} is managed by macOS and has no model path", model.name);
     };
+    // An office edition's administrator-installed copy comes first, read in
+    // place like a found file (crate::edition::managed_models_dir).
+    if !model.id.is_custom()
+        && let Some(path) = crate::edition::managed_model(artifact.filename, artifact.bytes)
+    {
+        return Ok(path);
+    }
     let managed = models_dir()?.join(artifact.filename);
     // A catalog model another app downloaded (one already in use, or an
     // exact match the last scan found), used where it is.
@@ -1058,6 +1069,12 @@ pub fn download_speech_detector(canceled: &AtomicBool) -> Result<PathBuf> {
 }
 
 pub fn speech_detector_path() -> Result<PathBuf> {
+    if let Some(path) = crate::edition::managed_model(
+        SPEECH_DETECTOR_ARTIFACT.filename,
+        SPEECH_DETECTOR_ARTIFACT.bytes,
+    ) {
+        return Ok(path);
+    }
     Ok(models_dir()?.join(SPEECH_DETECTOR_ARTIFACT.filename))
 }
 

@@ -27,6 +27,9 @@ concurrency:
 env:
   HEX_EDITION_NAME: Nexus Voice
   HEX_EDITION_BUNDLE_ID: nexus.voice
+  # The organization's model mirror (edition/intune/README.md); empty keeps
+  # Hugging Face for models IT didn't install.
+  HEX_EDITION_MODEL_MIRROR: ${{ vars.NEXUS_MODEL_MIRROR }}
 
 jobs:
   version:
@@ -135,6 +138,10 @@ jobs:
           hdiutil create -quiet -fs APFS -format ULFO -volname "$HEX_EDITION_NAME" \
             -srcfolder dist/staging "out/nexus-voice-$VERSION-macos-arm64.dmg"
           /usr/bin/ditto -c -k --keepParent "$bundle" "out/nexus-voice-$VERSION-macos-arm64.zip"
+          # For Intune (sign it with a Developer ID Installer certificate first).
+          pkgbuild --component "$bundle" --install-location /Applications \
+            --identifier "$HEX_EDITION_BUNDLE_ID.pkg" --version "$VERSION" \
+            "out/nexus-voice-$VERSION-macos-arm64.pkg"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: nexus-voice-macos
@@ -170,6 +177,7 @@ jobs:
             echo "Private, on-device dictation: hold a key, speak, and it types for you."
             echo
             echo "- **Windows:** run \`nexus-voice-setup-$VERSION-windows-x64.exe\`. At the SmartScreen warning choose *More info → Run anyway*."
+            echo "- **IT / Intune:** the \`.pkg\` and the setup \`.exe\` deploy silently; models install separately ([edition/intune](https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/edition/intune/README.md))."
             echo "- **Mac (Apple silicon):** open the DMG, drag **Nexus Voice** to Applications, then right-click it → *Open* (or System Settings → Privacy & Security → *Open Anyway*)."
             echo
             echo "Install guide: [edition/INSTALL.md](https://github.com/$GITHUB_REPOSITORY/blob/$GITHUB_SHA/edition/INSTALL.md) · Based on [Hex](https://github.com/anomalyco/hex) (MIT)."

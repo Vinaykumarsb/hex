@@ -131,6 +131,8 @@ fn test_build_commit() {
     println!("cargo:rerun-if-env-changed=HEX_TEST_BUILD");
     println!("cargo:rerun-if-env-changed=HEX_LOCAL_BUILD");
     println!("cargo:rerun-if-env-changed=HEX_EDITION_NAME");
+    println!("cargo:rerun-if-env-changed=HEX_EDITION_MODELS_DIR");
+    println!("cargo:rerun-if-env-changed=HEX_EDITION_MODEL_MIRROR");
     if std::env::var("HEX_TEST_BUILD").as_deref() != Ok("1")
         && std::env::var("HEX_LOCAL_BUILD").as_deref() != Ok("1")
     {

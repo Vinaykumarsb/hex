@@ -17,6 +17,10 @@ upstream/dev has new commits since the last sync?
    ├─ revert, on that branch, each commit the rubric below rejects
    ├─ resolve conflicts in the edition's touch points (edition/README.md)
    ├─ carry packaging/windows/hex.iss changes into edition/windows/nexus-voice.iss
+   ├─ model pins changed? python3 edition/intune/make-manifest.py, refresh the
+   │  sizes in edition/intune/windows/Detect-NexusVoiceModels.ps1 and the
+   │  MODELS list in edition/intune/macos/install-nexus-voice-models.sh, and
+   │  flag it: IT must re-run mirror-to-azure.sh and redeploy the models
    ├─ cargo check, and with HEX_EDITION_NAME="Nexus Voice", cargo clippy --bin hex
    └─ open a PR: "Upstream sync <date>", one line per commit: taken / skipped + why
 ```

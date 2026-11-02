@@ -24,13 +24,22 @@ HEX_EDITION_NAME="Nexus Voice"
 ├─ icon ............ edition/assets (app.ico, AppIcon.icns, app-icon.svg)
 ├─ macOS bundle .... "Nexus Voice.app", bundle ID nexus.voice
 │                    (HEX_EDITION_BUNDLE_ID), own permissions and login item
-└─ Windows setup ... nexus-voice-setup-<version>-windows-x64.exe, own
-                     Apps & Features entry and %APPDATA%\nexus-voice folder
+├─ Windows setup ... nexus-voice-setup-<version>-windows-x64.exe, own
+│                    Apps & Features entry and %APPDATA%\nexus-voice folder
+└─ models .......... read in place from the IT-managed folder
+                     (%ProgramData%\Nexus Voice\models, /Library/Application
+                     Support/Nexus Voice/models), pinned SHA-256 checked;
+                     anything else downloads from HEX_EDITION_MODEL_MIRROR
+                     (TE's Azure Blob) instead of Hugging Face
 ```
+
+Rolling out with Intune, including the models from Azure: [intune/README.md](intune/README.md).
 
 Code touch points (keep them this small when merging upstream):
 
 - `src/edition.rs`: the switch itself
+- `src/transcription/models.rs` (`model_path`, `speech_detector_path`,
+  `download_url`): the managed models folder and the mirror
 - `src/updater.rs` (`managed_by_policy`), `src/rune_ui.rs` (window title),
   `src/rune_ui/sidebar.rs` (`edition_mark`), `src/app_paths.rs`
   (`app_name`), `src/windows/rune.rs` (tray), `src/macos_rune/status_item.rs`
